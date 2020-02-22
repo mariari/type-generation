@@ -1,0 +1,46 @@
+
+program ::= <statement>*
+
+
+statement ::= <english>
+            | <math>
+
+;; English grammar -------------------------------------------------------
+english ::= type <name> <start>
+          | Type <name> with generic <symbol> <start>
+          | Type <name> with generics <symbol>* <start>
+
+start        ::= <start-product> <sum>+
+start-no-has ::= <start-product-2> <sum-no-has>+
+
+sum        ::= or <start-product>
+sum-no-has ::= or <start-product-2>
+
+start-product ::= has <start-product-2>
+
+start-product-2 ::= <product> with <name>
+                  | <product> ; generates a hole with the name. Should leave in?
+                  | name <name> with <product>
+
+naming ::= <symbol> <type>
+         | <symbol>
+
+product ::= <naming> <product_2>+
+          | <maybe>
+
+product_2 ::= and <product>
+
+
+maybe ::= maybe <naming>
+        | ( <start-no-has> )
+
+type = : <symbol>+
+     | of type <symbol>+
+
+;; Math grammar ----------------------------------------------------------
+
+
+;; General grammar -------------------------------------------------------
+symbol ::= <ascii>
+name   ::= <symbol>
+

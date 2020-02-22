@@ -1,6 +1,6 @@
 (executable
+ (public_name generation)
  (name generation)
  (libraries
   lib
-  angstrom)
- (flags (:standard)))
+  angstrom))
