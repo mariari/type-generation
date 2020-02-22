@@ -1,0 +1,6 @@
+(executable
+ (name generation)
+ (libraries
+  lib
+  angstrom)
+ (flags (:standard)))
