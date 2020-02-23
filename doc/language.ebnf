@@ -13,14 +13,14 @@ english ::= type <name> <start>
 start        ::= <start-product> <sum>+
 start-no-has ::= <start-product-2> <sum-no-has>+
 
-sum        ::= or <start-product>
-sum-no-has ::= or <start-product-2>
-
 start-product ::= has <start-product-2>
 
-start-product-2 ::= <product> with <name>
+start-product-2 ::= <product> with name <name>
                   | <product> ; generates a hole with the name. Should leave in?
                   | name <name> with <product>
+
+sum        ::= or <start-product>
+sum-no-has ::= or <start-product-2>
 
 naming ::= <symbol> <type>
          | <symbol>
@@ -32,7 +32,7 @@ product_2 ::= and <product>
 
 
 maybe ::= maybe <naming>
-        | ( <start-no-has> )
+        | maybe ( <start-no-has> )
 
 type = : <symbol>+
      | of type <symbol>+

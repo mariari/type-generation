@@ -2,4 +2,5 @@
  (name lib)
  (libraries
   angstrom
-  core))
+  core)
+ (preprocess (pps ppx_jane)))
