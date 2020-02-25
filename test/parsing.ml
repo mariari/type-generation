@@ -7,7 +7,7 @@ has network : a
 and latency
 and Thing of type Bar
 with name Connected
-or it has name Disconnected
+or has name Disconnected
 with maybe (foo and boo : Boo with name bar)
 and maybe baz : Maybe
 "

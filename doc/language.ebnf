@@ -10,8 +10,10 @@ english ::= type <name> <start>
           | Type <name> with generic <symbol> <start>
           | Type <name> with generics <symbol>* <start>
 
-start        ::= <start-product> <sum>+
-start-no-has ::= <start-product-2> <sum-no-has>+
+start        ::= <start-product> or <start>
+               | <start-product>
+start-no-has ::= <start-product-2> or <start-no-has>
+               | <start-product-2>
 
 start-product ::= has <start-product-2>
 
@@ -25,11 +27,9 @@ sum-no-has ::= or <start-product-2>
 naming ::= <symbol> <type>
          | <symbol>
 
-product ::= <naming> <product_2>+
+product ::= <naming> and <product>
+          | <naming>
           | <maybe>
-
-product_2 ::= and <product>
-
 
 maybe ::= maybe <naming>
         | maybe ( <start-no-has> )

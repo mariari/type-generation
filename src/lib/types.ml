@@ -32,7 +32,7 @@ type product_contents =
   | Maybe of {
       product : product
     }
-  | MaybeName of naming
+  | MaybeName of naming  (* happens if it's maybe in the real adt *)
   | Naming of naming
 
 and product = {
