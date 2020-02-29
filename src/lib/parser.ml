@@ -2,10 +2,39 @@ open Angstrom
 open Core
 
 (* ******************************************************* *)
+(* Let Syntax *)
+(* ******************************************************* *)
+
+module type Let_syntax = sig
+  type 'a t
+  val ( *> )  : _ t -> 'a t -> 'a t
+  val ( <*> ) : ('a -> 'b) t -> 'a t -> 'b t
+  val ( <$> ) : ('a -> 'b) -> 'a t -> 'b t
+  val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
+end
+
+module M (X : Let_syntax) = struct
+  open X
+  let both xs ys = X.((fun x y -> (x, y)) <$> xs <*> ys)
+
+  let next xs ys = X.(xs *> ys)
+
+  let ( let* ) l f = X.(>>=) l f
+  let ( let+ ) l f = X.(f <$> l)
+  let ( and+ ) l f = both l f
+
+  (* figure out how to desugar into *> or >> *)
+  (* let- and- : both throw away their argument *)
+  (* this is mainly done for efficiency reasons *)
+end
+
+open M (Angstrom)
+(* ******************************************************* *)
 (* Math Parser *)
 (* ******************************************************* *)
 
-let math = fail "undefined"
+let math =
+  fail "undefined"
 
 (* ******************************************************* *)
 (* English parser *)
@@ -26,13 +55,14 @@ let name   = symbol
 let product = fail ""
 
 let product_then_name =
-  let f prod name = Types.{name = Some name ; prod} in
-  f <$> product <*> string "with name" *> name
+  let+ prod = product
+  and+ name = string "with name" *> name
+  in Types.{name = Some name ; prod}
 
 let name_then_product =
-  let f name prod = Types.{name = Some name ; prod} in
-  f <$> string "name" *> name
-    <*> string "with" *> product
+  let+ name = string "name" *> name
+  and+ prod = string "with" *> product
+  in Types.{name = Some name ; prod}
 
 let product_no_name = fail ""
 
@@ -51,30 +81,29 @@ let start_no_has =
   start_generic (return ())
 
 let generic =
-  let f x y = Set.singleton (module Types.Symbol) x, y in
-  f <$> symbol
-    <*> start
+  let+ sym   = symbol
+  and+ start = start
+  in Set.singleton (module Types.Symbol) sym, start
 
 let generics =
-  let f x y = Set.of_list (module Types.Symbol) x, y in
   char 's' *>
-  (f <$> many_till symbol reserved <*> start)
+  let+ syms  = many_till symbol reserved
+  and+ start = start
+  in Set.of_list (module Types.Symbol) syms, start
 
 let generic_parser =
   string "generic" *>
   (generics <|> generic)
 
 let english_start =
-  let f y = Set.empty (module Types.Symbol), y in
-  f <$> start
+  let+ start = start in
+  Set.empty (module Types.Symbol), start
 
 let english =
-  let statement name (generics, choices) =
-    Types.{name; generics; choices}
-  in
-  (string "type" <|> string "Type")
-  *> (statement <$> name
-                <*> (generic_parser <|> english_start))
+  (string "type" <|> string "Type") *>
+  let+ name                = name
+  and+ (generics, choices) = generic_parser <|> english_start
+  in Types.{name; generics; choices}
 
 
 (* ******************************************************* *)
