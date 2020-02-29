@@ -14,12 +14,8 @@ module type Let_syntax = sig
 end
 
 module M (X : Let_syntax) = struct
-  open X
   let both xs ys = X.((fun x y -> (x, y)) <$> xs <*> ys)
-
-  let next xs ys = X.(xs *> ys)
-
-  let ( let* ) l f = X.(>>=) l f
+  let ( let* ) l f = X.(l >>= f)
   let ( let+ ) l f = X.(f <$> l)
   let ( and+ ) l f = both l f
 
@@ -29,6 +25,15 @@ module M (X : Let_syntax) = struct
 end
 
 open M (Angstrom)
+
+(* ******************************************************* *)
+(* Generic Parsing tools *)
+(* ******************************************************* *)
+
+let between p q = p *> q <* p
+
+let parens p =  char '(' *> p <* char ')'
+
 (* ******************************************************* *)
 (* Math Parser *)
 (* ******************************************************* *)
@@ -52,7 +57,24 @@ let word =
 let symbol = word
 let name   = symbol
 
-let product = fail ""
+let maybe_prod =
+  parens
+    (fail "")
+
+let maybe_single =
+  fail ""
+
+let maybe =
+  string "maybe" *> (maybe_prod <|> maybe_single)
+
+let type_parser = fail ""
+
+let naming =
+  let+ name = symbol
+  and+ type'  = type_parser
+  in Types.Naming { name ; type' }
+
+let product = maybe <|> naming
 
 let product_then_name =
   let+ prod = product
@@ -64,7 +86,9 @@ let name_then_product =
   and+ prod = string "with" *> product
   in Types.{name = Some name ; prod}
 
-let product_no_name = fail ""
+let product_no_name =
+  let+ prod = product in
+  Types.{name = None ; prod}
 
 (* could be faster, a lot of back tracking has to be done! *)
 let start_product_gen =  product_then_name
@@ -104,7 +128,6 @@ let english =
   let+ name                = name
   and+ (generics, choices) = generic_parser <|> english_start
   in Types.{name; generics; choices}
-
 
 (* ******************************************************* *)
 (* Main Program *)
