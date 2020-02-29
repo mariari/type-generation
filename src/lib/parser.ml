@@ -41,10 +41,8 @@ let start_product_gen =  product_then_name
                      <|> name_then_product
                      <|> product_no_name
 
-let rec start_generic p =
-  p *>
-  (List.cons <$> start_product_gen
-             <*> start_generic p)
+let start_generic p =
+  many (p *> start_product_gen)
 
 let start =
   start_generic (string "has")
