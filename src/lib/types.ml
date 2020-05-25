@@ -25,7 +25,7 @@ let empty_symbol = Set.empty (module Symbol)
 
 type naming = {
   name  : Symbol.t;
-  type' : Symbol.t option;
+  type' : Symbol.t list;
 }
 
 type product_contents =
